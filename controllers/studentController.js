@@ -5,9 +5,9 @@ const jwt = require('jsonwebtoken');
 const getStudents = async (req, res) => {  
     try {  
         const [rows] = await pool.query('SELECT student_id, lname, fname, mname, user_id, course_id, created_at, updated_at FROM students');  
-        res.json(rows);  
+        res.json({ students: rows });  
     } catch (err) {  
-        res.status(500).json({ error: err.message });  
+        res.status(500).json({ error: 'An error occurred while fetching students' });  
     }  
 };  
 
@@ -18,12 +18,12 @@ const getStudentsById = async (req, res) => {
         const [rows] = await pool.query('SELECT student_id, lname, fname, mname, user_id, course_id, created_at, updated_at FROM students WHERE student_id = ?', [id]);  
 
         if (rows.length === 0) {  
-            return res.status(404).json({ error: 'Student not found' });  
+            return res.status(404).json({ error: 'No student found with the provided ID' });  
         }  
 
-        res.json(rows[0]);  
+        res.json({ student: rows[0] });  
     } catch (err) {  
-        res.status(500).json({ error: err.message });  
+        res.status(500).json({ error: 'An error occurred while fetching the student' });  
     }  
 };  
 
@@ -32,9 +32,9 @@ const createStudents = async (req, res) => {
 
     try {  
         const [result] = await pool.query('INSERT INTO students (lname, fname, mname, user_id, course_id) VALUES (?, ?, ?, ?, ?)', [lname, fname, mname, user_id, course_id]);  
-        res.status(201).json({ id: result.insertId, lname, fname, mname, user_id, course_id });  
+        res.status(201).json({ id: result.insertId, lname, fname, mname, user_id, course_id, message: 'Student created successfully' });  
     } catch (err) {  
-        res.status(500).json({ error: err.message });  
+        res.status(500).json({ error: 'An error occurred while creating the student' });  
     }  
 };  
 
@@ -43,15 +43,15 @@ const updateStudents = async (req, res) => {
     const { lname, fname, mname, user_id, course_id } = req.body;  
 
     try {  
-        const [result] = await pool.query('UPDATE students SET lname = ?, fname = ?, mname = ?,  user_id = ?, course_id = ? WHERE student_id = ?', [lname, fname, mname, user_id, course_id, id]);  
+        const [result] = await pool.query('UPDATE students SET lname = ?, fname = ?, mname = ?, user_id = ?, course_id = ? WHERE student_id = ?', [lname, fname, mname, user_id, course_id, id]);  
 
         if (result.affectedRows === 0) {  
-            return res.status(404).json({ error: 'Student not found' });  
+            return res.status(404).json({ error: 'No student found to update with the provided ID' });  
         }  
 
-        res.json({ message: 'Student updated successfully' });  
+        res.json({ message: 'Student has been updated successfully' });  
     } catch (err) {  
-        res.status(500).json({ error: err.message });  
+        res.status(500).json({ error: 'An error occurred while updating the student' });  
     }  
 };  
 
@@ -63,13 +63,13 @@ const deleteStudents = async (req, res) => {
         const [result] = await pool.query('DELETE FROM students WHERE student_id = ?', [studentId]);  
 
         if (result.affectedRows === 0) {  
-            return res.status(404).json({ error: 'Student not found' });  
+            return res.status(404).json({ error: 'No student found to delete with the provided ID' });  
         }  
 
-        res.status(200).json({ message: 'Student deleted successfully' });  
+        res.status(200).json({ message: 'Student has been deleted successfully' });  
     } catch (err) {  
         console.error("Error executing query:", err);  
-        res.status(500).json({ error: err.message });  
+        res.status(500).json({ error: 'An error occurred while deleting the student' });  
     }  
 };  
 
